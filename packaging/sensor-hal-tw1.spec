@@ -6,7 +6,7 @@ Group:      Service/Sensor
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
 
-%if "%{?profile}" == "mobile"
+%if "%{?profile}" == "wearable"
 ExcludeArch: aarch64 %ix86 x86_64
 %else
 ExcludeArch: %{arm} aarch64 %ix86 x86_64
