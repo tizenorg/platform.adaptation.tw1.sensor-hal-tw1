@@ -34,8 +34,10 @@ static bool get_event_num(const string &input_path, string &event_num)
 {
 	const string event_prefix = PREFIX_EVENT;
 	DIR *dir = NULL;
-	struct dirent *dir_entry = NULL;
-	string node_name;
+	struct dirent dir_entry;
+	struct dirent *result = NULL;
+	std::string node_name;
+	int error;
 	bool find = false;
 
 	dir = opendir(input_path.c_str());
@@ -46,8 +48,16 @@ static bool get_event_num(const string &input_path, string &event_num)
 
 	int prefix_size = event_prefix.size();
 
-	while (!find && (dir_entry = readdir(dir))) {
-		node_name = dir_entry->d_name;
+	while (true) {
+		error = readdir_r(dir, &dir_entry, &result);
+
+		if (error != 0)
+			continue;
+
+		if (result == NULL)
+			break;
+
+		node_name = std::string(dir_entry.d_name);
 
 		if (node_name.compare(0, prefix_size, event_prefix) != 0)
 			continue;
@@ -143,10 +153,12 @@ static bool get_input_method(const string &key, int &method, string &device_num)
 
 	const int input_info_len = sizeof(input_info)/sizeof(input_info[0]);
 	size_t prefix_size;
-	string name_node, name;
-	string d_name;
+	std::string name_node, name;
+	std::string d_name;
 	DIR *dir = NULL;
-	struct dirent *dir_entry = NULL;
+	struct dirent dir_entry;
+	struct dirent *result = NULL;
+	int error;
 	bool find = false;
 
 	for (int i = 0; i < input_info_len; ++i) {
@@ -161,8 +173,16 @@ static bool get_input_method(const string &key, int &method, string &device_num)
 
 		find = false;
 
-		while (!find && (dir_entry = readdir(dir))) {
-			d_name = string(dir_entry->d_name);
+		while (true) {
+			error = readdir_r(dir, &dir_entry, &result);
+
+			if (error != 0)
+				continue;
+
+			if (result == NULL)
+				break;
+
+			d_name = std::string(dir_entry.d_name);
 
 			if (d_name.compare(0, prefix_size, input_info[i].prefix) != 0)
 				continue;
@@ -195,11 +215,13 @@ static bool get_input_method(const string &key, int &method, string &device_num)
 
 bool util::find_model_id(const string &sensor_type, string &model_id)
 {
-	string dir_path = "/sys/class/sensors/";
-	string name_node, name;
-	string d_name;
+	std::string dir_path = "/sys/class/sensors/";
+	std::string name_node, name;
+	std::string d_name;
 	DIR *dir = NULL;
-	struct dirent *dir_entry = NULL;
+	struct dirent dir_entry;
+	struct dirent *result = NULL;
+	int error;
 	bool find = false;
 
 	dir = opendir(dir_path.c_str());
@@ -208,10 +230,18 @@ bool util::find_model_id(const string &sensor_type, string &model_id)
 		return false;
 	}
 
-	while (!find && (dir_entry = readdir(dir))) {
-		d_name = string(dir_entry->d_name);
+	while (true) {
+		error = readdir_r(dir, &dir_entry, &result);
 
-		if ((d_name == ".") || (d_name == "..") || (dir_entry->d_ino == 0))
+		if (error != 0)
+			continue;
+
+		if (result == NULL)
+			break;
+
+		d_name = std::string(dir_entry.d_name);
+
+		if ((d_name == ".") || (d_name == "..") || (dir_entry.d_ino == 0))
 			continue;
 
 		name_node = dir_path + d_name + string("/name");
