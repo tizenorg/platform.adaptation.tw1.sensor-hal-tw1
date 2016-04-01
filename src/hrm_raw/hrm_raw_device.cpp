@@ -147,7 +147,7 @@ hrm_raw_device::hrm_raw_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_E("hrm raw handle open fail for hrm raw sensor, error:%s", strerror(errno));
+		_ERRNO(errno, _E, "hrm raw handle open fail for hrm raw sensor");
 		throw ENXIO;
 	}
 
