@@ -170,7 +170,7 @@ pressure_device::pressure_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "pressure handle open fail for pressure sensor");
+		_E("pressure handle open fail for pressure sensor, error:%s\n", strerror(errno));
 		throw ENXIO;
 	}
 

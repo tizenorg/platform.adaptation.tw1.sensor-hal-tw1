@@ -115,7 +115,7 @@ hrm_device::hrm_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "Failed to open HRM handle");
+		_E("hrm handle open fail for hrm device, error:%s", strerror(errno));
 		throw ENXIO;
 	}
 

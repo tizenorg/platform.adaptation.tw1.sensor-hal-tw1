@@ -141,7 +141,7 @@ accel_device::accel_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "accel handle open fail for accel processor");
+		_E("accel handle open fail for accel processor, error:%s", strerror(errno));
 		throw ENXIO;
 	}
 
@@ -320,7 +320,7 @@ bool accel_device::update_value_iio(void)
 	int ret = poll(&pfd, 1, -1);
 
 	if (ret == -1) {
-		_ERRNO(errno, _E, "Failed to poll from m_node_handle:%d", m_node_handle);
+		_E("poll error:%s m_node_handle:d", strerror(errno), m_node_handle);
 		return false;
 	} else if (!ret) {
 		_E("poll timeout m_node_handle:%d", m_node_handle);

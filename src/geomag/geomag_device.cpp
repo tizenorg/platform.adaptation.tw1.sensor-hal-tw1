@@ -140,7 +140,7 @@ geomag_device::geomag_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "geomag handle open fail for geomag device");
+		_E("geomag handle open fail for geomag device, error:%s\n", strerror(errno));
 		throw ENXIO;
 	}
 
@@ -321,7 +321,7 @@ bool geomag_device::update_value_iio(void)
 	int ret = poll(&pfd, 1, -1);
 
 	if (ret == -1) {
-		_ERRNO(errno, _E, "Failed to poll from m_node_handle:%d", m_node_handle);
+		_E("poll error:%s m_node_handle:d", strerror(errno), m_node_handle);
 		return false;
 	} else if (!ret) {
 		_E("poll timeout m_node_handle:%d", m_node_handle);

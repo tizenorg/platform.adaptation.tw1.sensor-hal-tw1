@@ -104,7 +104,7 @@ proxi_device::proxi_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "proxi handle open fail for proxi device");
+		_E("proxi handle open fail for proxi device, error:%s", strerror(errno));
 		throw ENXIO;
 	}
 
@@ -175,7 +175,7 @@ bool proxi_device::update_value_input_event(void)
 	int len = read(m_node_handle, &proxi_event, sizeof(proxi_event));
 
 	if (len == -1) {
-		_ERRNO(errno, _E, "Failed to read from m_node_handle");
+		_D("read(m_node_handle) is error:%s.", strerror(errno));
 		return false;
 	}
 

@@ -115,7 +115,7 @@ light_device::light_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "light handle open fail for light device");
+		_E("light handle open fail for light device, error:%s", strerror(errno));
 		throw ENXIO;
 	}
 
@@ -279,7 +279,7 @@ bool light_device::update_value_lux(void)
 
 	int len = read(m_node_handle, &light_event, sizeof(light_event));
 	if (len == -1) {
-		_ERRNO(errno, _E, "Failed to read from m_node_handle");
+		_D("read(m_node_handle) is error:%s.", strerror(errno));
 		return false;
 	}
 
