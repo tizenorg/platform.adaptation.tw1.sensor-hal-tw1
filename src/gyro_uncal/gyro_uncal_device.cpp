@@ -153,7 +153,7 @@ gyro_uncal_device::gyro_uncal_device()
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
-		_E("gyro_uncal handle open fail for gyro_uncal device, error:%s", strerror(errno));
+		_ERRNO(errno, _E, "gyro_uncal handle open fail for gyro_uncal device");
 		throw ENXIO;
 	}
 
