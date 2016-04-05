@@ -174,11 +174,6 @@ pressure_device::pressure_device()
 		throw ENXIO;
 	}
 
-	if ((m_node_handle = open(m_data_node.c_str(),O_RDWR)) < 0) {
-		_E("Failed to open handle(%d)", m_node_handle);
-		throw ENXIO;
-	}
-
 	if (m_method == INPUT_EVENT_METHOD) {
 		int clockId = CLOCK_MONOTONIC;
 		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
