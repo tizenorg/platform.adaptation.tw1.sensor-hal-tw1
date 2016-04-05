@@ -35,7 +35,6 @@ public:
 	bool disable(uint32_t id);
 
 	bool set_interval(uint32_t id, unsigned long val);
-	bool set_attribute_int(uint32_t id, int32_t attribute, int32_t value);
 
 	int read_fd(uint32_t **ids);
 	int get_data(uint32_t id, sensor_data_t **data, int *length);

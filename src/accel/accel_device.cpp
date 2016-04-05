@@ -231,11 +231,6 @@ bool accel_device::set_interval(uint32_t id, unsigned long val)
 	return true;
 }
 
-bool accel_device::set_attribute_int(uint32_t id, int32_t attribute, int32_t value)
-{
-	return false;
-}
-
 bool accel_device::update_value_input_event(void)
 {
 	int accel_raw[3] = {0,};
