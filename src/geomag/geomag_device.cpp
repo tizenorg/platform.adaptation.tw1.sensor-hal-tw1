@@ -36,6 +36,15 @@
 #define INPUT_NAME	"geomagnetic_sensor"
 #define GEOMAG_SENSORHUB_POLL_NODE_NAME "mag_poll_delay"
 
+/*
+ * x(short): 2 byte
+ * y(short): 2 byte
+ * z(short): 2 byte
+ * hdst(short): 2byte
+ * timestamp(long long): 8byte
+ */
+#define MAX_IIO_READ_LEN 16
+
 static sensor_info_t sensor_info = {
 	id: 0x1,
 	name: "Geomagnetic Sensor",
@@ -309,7 +318,7 @@ bool geomag_device::update_value_input_event(void)
 
 bool geomag_device::update_value_iio(void)
 {
-	const int READ_LEN = 14;
+	const int READ_LEN = MAX_IIO_READ_LEN;
 	char data[READ_LEN] = {0,};
 
 	struct pollfd pfd;
