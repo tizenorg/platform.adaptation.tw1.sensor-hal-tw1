@@ -298,8 +298,12 @@ bool gyro_device::update_value_input_event(void)
 
 bool gyro_device::update_value_iio(void)
 {
-	const int READ_LEN = 14;
-	char data[READ_LEN] = {0,};
+	struct {
+		int16_t x;
+		int16_t y;
+		int16_t z;
+		int64_t timestamp;
+	} __attribute__((packed)) data;
 
 	struct pollfd pfd;
 
@@ -327,17 +331,17 @@ bool gyro_device::update_value_iio(void)
 		return false;
 	}
 
-	int len = read(m_node_handle, data, sizeof(data));
+	int len = read(m_node_handle, &data, sizeof(data));
 
 	if (len != sizeof(data)) {
 		_E("Failed to read data, m_node_handle:%d read_len:%d", m_node_handle, len);
 		return false;
 	}
 
-	memcpy(&m_x, data, sizeof(short));
-	memcpy(&m_y, (data + 2), sizeof(short));
-	memcpy(&m_z, (data + 4), sizeof(short));
-	memcpy(&m_fired_time, (data + 6), sizeof(long long));
+	m_x = data.x;
+	m_y = data.y;
+	m_z = data.z;
+	m_fired_time = data.timestamp;
 
 	_D("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
 
