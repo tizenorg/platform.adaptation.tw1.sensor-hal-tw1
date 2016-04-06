@@ -36,6 +36,15 @@
 #define INPUT_NAME	"geomagnetic_sensor"
 #define GEOMAG_SENSORHUB_POLL_NODE_NAME "mag_poll_delay"
 
+/*
+ * x(short): 2 bytes
+ * y(short): 2 bytes
+ * z(short): 2 bytes
+ * hdst(short): 2bytes
+ * timestamp(long long): 8 bytes
+ */
+#define MAX_IIO_READ_LEN 16
+
 static sensor_info_t sensor_info = {
 	id: 0x1,
 	name: "Geomagnetic Sensor",
@@ -309,8 +318,14 @@ bool geomag_device::update_value_input_event(void)
 
 bool geomag_device::update_value_iio(void)
 {
-	const int READ_LEN = 14;
-	char data[READ_LEN] = {0,};
+	const int READ_LEN = MAX_IIO_READ_LEN;
+	struct {
+		int16_t x;
+		int16_t y;
+		int16_t z;
+		int16_t hdst;
+		int64_t timestamp;
+	} __attribute__((packed)) data;
 
 	struct pollfd pfd;
 
@@ -345,15 +360,13 @@ bool geomag_device::update_value_iio(void)
 		return false;
 	}
 
-	memcpy(&m_x, data, sizeof(short));
-	memcpy(&m_y, (data + 2), sizeof(short));
-	memcpy(&m_z, (data + 4), sizeof(short));
-	memcpy(&m_hdst, (data + 6), sizeof(short));
-	memcpy(&m_fired_time, (data + 8), sizeof(long long));
+	m_x = data.x;
+	m_y = data.y;
+	m_z = data.z;
+	m_hdst = data.hdst - 1;
+	m_fired_time = data.timestamp;
 
-	m_hdst--;
-
-	_D("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
+	_D("m_x = %d, m_y = %d, m_z = %d, m_hdst = %d, time = %lluus", m_x, m_y, m_z, m_hdst, m_fired_time);
 
 	return true;
 }
