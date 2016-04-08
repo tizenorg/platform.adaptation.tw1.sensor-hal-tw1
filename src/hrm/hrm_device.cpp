@@ -30,13 +30,13 @@
 #include <sensor_config.h>
 #include "hrm_device.h"
 
-#define UNKNOWN_NAME "UNKNOWN"
-
-#define SENSOR_NAME "HRM SENSOR"
+#define SENSOR_NAME "SENSOR_HRM"
 #define SENSOR_TYPE_HRM "HRM"
 
 #define INPUT_NAME	"hrm_lib_sensor"
 #define HRM_SENSORHUB_POLL_NODE_NAME "hrm_poll_delay"
+
+#define DEFAULT_RAW_DATA_UNIT 1
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
@@ -53,19 +53,20 @@ static sensor_info_t sensor_info = {
 	wakeup_supported: false
 };
 
-std::vector<uint32_t> hrm_device::event_ids;
-
 hrm_device::hrm_device()
 : m_node_handle(-1)
 , m_hr(0)
 , m_spo2(0)
 , m_peek_to_peek(0)
 , m_snr(0.0f)
+, m_raw_data_unit(DEFAULT_RAW_DATA_UNIT)
 , m_polling_interval(1000)
 , m_fired_time(0)
 , m_interval_supported(false)
 , m_sensorhub_controlled(false)
 {
+	double raw_data_unit = DEFAULT_RAW_DATA_UNIT;
+
 	const std::string sensorhub_interval_node_name = HRM_SENSORHUB_POLL_NODE_NAME;
 	config::sensor_config &config = config::sensor_config::get_instance();
 
@@ -112,6 +113,13 @@ hrm_device::hrm_device()
 
 	_I("m_chip_name = %s",m_chip_name.c_str());
 
+	if (!config.get(SENSOR_TYPE_HRM, m_model_id, ELEMENT_RAW_DATA_UNIT, raw_data_unit)) {
+		_I("[RAW_DATA_UNIT] is empty");
+	}
+
+	m_raw_data_unit = (float)(raw_data_unit);
+	_I("m_raw_data_unit = %f", m_raw_data_unit);
+
 	m_node_handle = open(m_data_node.c_str(), O_RDWR);
 
 	if (m_node_handle < 0) {
@@ -122,11 +130,8 @@ hrm_device::hrm_device()
 	if (m_method != INPUT_EVENT_METHOD)
 		throw ENXIO;
 
-	int clockId = CLOCK_MONOTONIC;
-	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-		_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+	if (!util::set_monotonic_clock(m_node_handle))
 		throw ENXIO;
-	}
 
 	update_value = [=]() {
 		return this->update_value_input_event();
@@ -286,8 +291,15 @@ int hrm_device::get_data(uint32_t id, sensor_data_t **data, int *length)
 	sensor_data->values[2] = m_peek_to_peek;
 	sensor_data->values[3] = m_snr;
 
+	raw_to_base(sensor_data);
+
 	*data = sensor_data;
 	*length = sizeof(sensor_data_t);
 
 	return --remains;
+}
+
+void hrm_device::raw_to_base(sensor_data_t *data)
+{
+	data->values[0] = data->values[0] * m_raw_data_unit;
 }

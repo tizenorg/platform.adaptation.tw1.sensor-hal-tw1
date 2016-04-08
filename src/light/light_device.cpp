@@ -33,7 +33,8 @@
 #include "light_device.h"
 
 #define BIAS	1
-#define UNKNOWN_NAME "UNKNOWN"
+
+#define SENSOR_NAME "SENSOR_LIGHT"
 
 /* ADC value received from Kernel */
 #define MODEL_ID_CAPELLA		"CM36686"
@@ -47,7 +48,7 @@ const static int light_level[] = {0, 1, 165, 288, 497, 869, 1532, 2692, 4692, 82
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
-	name: "Light Sensor",
+	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_LIGHT,
 	event_type: (SENSOR_DEVICE_LIGHT << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 	model_name: UNKNOWN_NAME,
@@ -59,8 +60,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> light_device::event_ids;
 
 light_device::light_device()
 : m_node_handle(-1)
@@ -120,11 +119,8 @@ light_device::light_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		if (m_chip_name == MODEL_ID_CAPELLA) {
 			update_value = [=]() {

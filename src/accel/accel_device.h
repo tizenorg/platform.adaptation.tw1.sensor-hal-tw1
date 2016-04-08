@@ -62,7 +62,7 @@ private:
 
 	std::function<bool (void)> update_value;
 
-	static std::vector<uint32_t> event_ids;
+	std::vector<uint32_t> event_ids;
 
 	bool update_value_input_event(void);
 	bool update_value_iio(void);

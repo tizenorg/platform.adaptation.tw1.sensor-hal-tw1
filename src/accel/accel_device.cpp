@@ -41,7 +41,7 @@
 #define REACTIVE_ALERT_OFF	0
 #define REACTIVE_ALERT_ON	1
 
-#define UNKNOWN_NAME "UNKNOWN"
+#define SENSOR_NAME "SENSOR_ACCELEROMETER"
 
 #define SENSOR_TYPE_ACCEL		"ACCEL"
 
@@ -50,7 +50,7 @@
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
-	name: "ACCELEROMETER",
+	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_ACCELEROMETER,
 	event_type: (SENSOR_DEVICE_ACCELEROMETER << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 	model_name: UNKNOWN_NAME,
@@ -62,8 +62,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> accel_device::event_ids;
 
 accel_device::accel_device()
 : m_node_handle(-1)
@@ -146,11 +144,8 @@ accel_device::accel_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();

@@ -62,7 +62,7 @@ private:
 	std::string m_vendor;
 	std::string m_chip_name;
 
-	static std::vector<uint32_t> event_ids;
+	std::vector<uint32_t> event_ids;
 
 	hrm_raw_data_reader* get_reader(const std::string& reader);
 };

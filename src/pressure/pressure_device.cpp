@@ -33,14 +33,13 @@
 
 #define SEA_LEVEL_RESOLUTION 0.01
 #define SEA_LEVEL_PRESSURE 101325.0
+#define SEA_LEVEL_EPSILON 0.00001
 
-#define SENSOR_NAME "PRESSURE_SENSOR"
+#define SENSOR_NAME "SENSOR_PRESSURE"
 #define SENSOR_TYPE_PRESSURE "PRESSURE"
 
 #define ELEMENT_TEMPERATURE_RESOLUTION	"TEMPERATURE_RESOLUTION"
 #define ELEMENT_TEMPERATURE_OFFSET		"TEMPERATURE_OFFSET"
-
-#define UNKNOWN_NAME "UNKNOWN"
 
 #define INPUT_NAME "pressure_sensor"
 #define PRESSURE_SENSORHUB_POLL_NODE_NAME "pressure_poll_delay"
@@ -59,8 +58,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> pressure_device::event_ids;
 
 pressure_device::pressure_device()
 : m_node_handle(-1)
@@ -175,11 +172,8 @@ pressure_device::pressure_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();
@@ -368,7 +362,11 @@ void pressure_device::raw_to_base(sensor_data_t *data)
 
 float pressure_device::pressure_to_altitude(float pressure)
 {
-	/* TODO: use m_sea_level_pressure instread of SEA_LEVEL_PRESSURE */
-	return 44330.0f * (1.0f - pow(pressure/SEA_LEVEL_PRESSURE, 1.0f/5.255f));
+	float sea_level_pressure = m_sea_level_pressure;
+
+	if (sea_level_pressure < SEA_LEVEL_EPSILON && sea_level_pressure > -SEA_LEVEL_EPSILON)
+		sea_level_pressure = SEA_LEVEL_PRESSURE * SEA_LEVEL_RESOLUTION;
+
+	return 44330.0f * (1.0f - pow(pressure/sea_level_pressure, 1.0f/5.255f));
 }
 
