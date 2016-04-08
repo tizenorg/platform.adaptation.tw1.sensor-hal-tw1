@@ -22,7 +22,7 @@
 #include <unordered_map>
 #include <sensor_log.h>
 
-#define CONFIG_FILE_PATH "/usr/etc/sensors.xml"
+#define CONFIG_FILE_PATH "/usr/etc/sensor.xml"
 
 #define ELEMENT_NAME			"NAME"
 #define ELEMENT_VENDOR			"VENDOR"

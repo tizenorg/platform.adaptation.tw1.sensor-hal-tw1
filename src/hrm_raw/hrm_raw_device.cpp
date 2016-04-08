@@ -34,7 +34,7 @@
 #include "hrm_raw_data_reader_adi.h"
 #include "hrm_raw_device.h"
 
-#define UNKNOWN_NAME "UNKNOWN"
+#define SENSOR_NAME "SENSOR_HRM_RAW"
 #define SENSOR_TYPE_HRM_RAW "HRM_RAW"
 
 #define INPUT_NAME	"hrm_raw_sensor"
@@ -49,7 +49,7 @@
 static sensor_info_t sensor_info[] = {
 	{
 		id: INDEX_HRM_RAW,
-		name: "HRM RAW SENSOR",
+		name: SENSOR_NAME,
 		type: SENSOR_DEVICE_HRM_RAW,
 		event_type: (SENSOR_DEVICE_HRM_RAW << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 		model_name: UNKNOWN_NAME,
@@ -76,8 +76,6 @@ static sensor_info_t sensor_info[] = {
 		wakeup_supported: false
 	}
 };
-
-std::vector<uint32_t> hrm_raw_device::event_ids;
 
 hrm_raw_device::hrm_raw_device()
 : m_node_handle(-1)
@@ -154,11 +152,8 @@ hrm_raw_device::hrm_raw_device()
 	if (m_method != INPUT_EVENT_METHOD)
 		throw ENXIO;
 
-	int clockId = CLOCK_MONOTONIC;
-	if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-		_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+	if (!util::set_monotonic_clock(m_node_handle))
 		throw ENXIO;
-	}
 
 	m_reader = get_reader(reader);
 

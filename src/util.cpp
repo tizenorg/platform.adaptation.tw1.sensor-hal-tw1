@@ -213,6 +213,18 @@ static bool get_input_method(const string &key, int &method, string &device_num)
 	return find;
 }
 
+bool util::set_monotonic_clock(int fd)
+{
+#ifdef EVIOCSCLOCKID
+	int clockId = CLOCK_MONOTONIC;
+	if (ioctl(fd, EVIOCSCLOCKID, &clockId) != 0) {
+		_E("Fail to set monotonic timestamp for fd[%d]", fd);
+		return false;
+	}
+#endif
+	return true;
+}
+
 bool util::find_model_id(const string &sensor_type, string &model_id)
 {
 	std::string dir_path = "/sys/class/sensors/";

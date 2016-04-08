@@ -30,7 +30,7 @@
 #include <sensor_config.h>
 #include "geomag_device.h"
 
-#define UNKNOWN_NAME "UNKNOWN"
+#define SENSOR_NAME "SENSOR_GEOMAGNETIC"
 #define SENSOR_TYPE_MAGNETIC	"MAGNETIC"
 
 #define INPUT_NAME	"geomagnetic_sensor"
@@ -38,7 +38,7 @@
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
-	name: "Geomagnetic Sensor",
+	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_GEOMAGNETIC,
 	event_type: (SENSOR_DEVICE_GEOMAGNETIC << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 	model_name: UNKNOWN_NAME,
@@ -50,8 +50,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> geomag_device::event_ids;
 
 geomag_device::geomag_device()
 : m_node_handle(-1)
@@ -145,11 +143,8 @@ geomag_device::geomag_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();

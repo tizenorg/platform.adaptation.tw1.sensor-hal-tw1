@@ -45,7 +45,7 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %files
-%attr(0644,root,root)/usr/etc/sensors.xml
+%attr(0644,root,root)/usr/etc/sensor.xml
 %manifest packaging/%{name}.manifest
 %{_libdir}/sensor/*.so
 %{_datadir}/license/sensor-hal-tw1
