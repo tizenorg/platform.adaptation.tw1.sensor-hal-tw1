@@ -147,7 +147,7 @@ gyro_uncal_device::gyro_uncal_device()
 	m_max_range = (float)max_range;
 	_I("m_max_range = %f",m_max_range);
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "gyro_uncal handle open fail for gyro_uncal device");

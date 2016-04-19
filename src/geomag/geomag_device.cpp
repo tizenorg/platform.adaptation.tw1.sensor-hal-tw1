@@ -135,7 +135,7 @@ geomag_device::geomag_device()
 	m_raw_data_unit = (float)(raw_data_unit);
 	_I("m_raw_data_unit = %f\n", m_raw_data_unit);
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "geomag handle open fail for geomag device");

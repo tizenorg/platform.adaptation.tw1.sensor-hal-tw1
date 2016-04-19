@@ -164,7 +164,7 @@ pressure_device::pressure_device()
 	m_temperature_offset = (float)temperature_offset;
 	INFO("m_temperature_offset = %f\n", m_temperature_offset);
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "pressure handle open fail for pressure sensor");

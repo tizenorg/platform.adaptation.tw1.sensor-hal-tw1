@@ -142,7 +142,7 @@ hrm_raw_device::hrm_raw_device()
 
 	_I("reader = %s", reader.c_str());
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "hrm raw handle open fail for hrm raw sensor");

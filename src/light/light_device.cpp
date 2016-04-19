@@ -111,7 +111,7 @@ light_device::light_device()
 
 	_I("m_chip_name = %s",m_chip_name.c_str());
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "light handle open fail for light device");
