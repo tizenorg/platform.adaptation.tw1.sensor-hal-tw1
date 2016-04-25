@@ -29,7 +29,7 @@
 #include <sensor_config.h>
 #include "proxi_device.h"
 
-#define UNKNOWN_NAME "UNKNOWN"
+#define SENSOR_NAME "SENSOR_PROXIMITY"
 #define SENSOR_TYPE_PROXI		"PROXI"
 
 #define INPUT_NAME	"proximity_sensor"
@@ -37,7 +37,7 @@
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
-	name: "Proximity Sensor",
+	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_PROXIMITY,
 	event_type: (SENSOR_DEVICE_PROXIMITY << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 	model_name: UNKNOWN_NAME,
@@ -49,8 +49,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> proxi_device::event_ids;
 
 proxi_device::proxi_device()
 : m_node_handle(-1)
@@ -101,7 +99,7 @@ proxi_device::proxi_device()
 
 	_I("m_chip_name = %s",m_chip_name.c_str());
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "proxi handle open fail for proxi device");
@@ -109,11 +107,8 @@ proxi_device::proxi_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();

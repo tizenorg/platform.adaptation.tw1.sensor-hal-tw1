@@ -1,6 +1,6 @@
 Name:       sensor-hal-tw1
 Summary:    TW1 Sensor HAL
-Version:    1.0.0
+Version:    1.0.2
 Release:    0
 Group:      Service/Sensor
 License:    Apache-2.0
@@ -45,7 +45,7 @@ rm -rf %{buildroot}
 /sbin/ldconfig
 
 %files
-%attr(0644,root,root)/usr/etc/sensors.xml
+%attr(0644,root,root)/usr/etc/sensor.xml
 %manifest packaging/%{name}.manifest
 %{_libdir}/sensor/*.so
 %{_datadir}/license/sensor-hal-tw1

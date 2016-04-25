@@ -35,8 +35,7 @@
 #define MIN_RANGE(RES) (-((1 << (RES))/2))
 #define MAX_RANGE(RES) (((1 << (RES))/2)-1)
 
-#define UNKNOWN_NAME "UNKNOWN"
-#define SENSOR_NAME "GYROSCOPE UNCALIB SENSOR"
+#define SENSOR_NAME "SENSOR_GYROSCOPE_UNCALIBRATED"
 #define SENSOR_TYPE_GYRO_UNCAL  "GYRO"
 
 #define INPUT_NAME	"uncal_gyro_sensor"
@@ -56,8 +55,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> gyro_uncal_device::event_ids;
 
 gyro_uncal_device::gyro_uncal_device()
 : m_node_handle(-1)
@@ -150,7 +147,7 @@ gyro_uncal_device::gyro_uncal_device()
 	m_max_range = (float)max_range;
 	_I("m_max_range = %f",m_max_range);
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "gyro_uncal handle open fail for gyro_uncal device");
@@ -158,11 +155,8 @@ gyro_uncal_device::gyro_uncal_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();

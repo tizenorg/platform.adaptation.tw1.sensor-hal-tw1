@@ -8,6 +8,13 @@
 			<RESOLUTION value="12" />
 		</MODEL>
 
+		<MODEL id="LSM330">
+			<NAME value="LSM330"/>
+			<VENDOR value="ST Microelectronics"/>
+			<RAW_DATA_UNIT value="1" />
+			<RESOLUTION value="12" />
+		</MODEL>
+
 		<MODEL id="K2HH">
 			<NAME value="K2HH" />
 			<VENDOR value="ST Microelectronics"/>
@@ -109,6 +116,13 @@
 			<RESOLUTION value="12" />
 		</MODEL>
 
+		<MODEL id="LSM330">
+			<NAME value="LSM330"/>
+			<VENDOR value="ST Microelectronics"/>
+			<RAW_DATA_UNIT value="17.50" />
+			<RESOLUTION value="16" />
+		</MODEL>
+
 		<MODEL id="MPU6500">
 			<NAME value="MPU6500"/>
 			<VENDOR value="Invensense"/>
@@ -177,6 +191,8 @@
 			<VENDOR value="Tizen_SDK"/>
 			<RAW_DATA_UNIT value="1000"/>
 			<RESOLUTION value="16"/>
+			<MIN_RANGE value="-573"/>
+			<MAX_RANGE value="573"/>
 		</MODEL>
 	</GYRO>
 
@@ -201,7 +217,7 @@
 			<VENDOR value="Sharp"/>
 		</MODEL>
 
-		<MODEL id="cm36651">
+		<MODEL id="CM36651">
 			<NAME value="CM36651" />
 			<VENDOR value="Capella"/>
 		</MODEL>
@@ -248,7 +264,7 @@
 			<VENDOR value="Sharp"/>
 		</MODEL>
 
-		<MODEL id="cm36651">
+		<MODEL id="CM36651">
 			<NAME value="CM36651" />
 			<VENDOR value="Capella"/>
 		</MODEL>
@@ -290,6 +306,15 @@
 	</LIGHT>
 
 	<MAGNETIC>
+		<MODEL id="AK8975C">
+			<NAME value="AK8975C" />
+			<VENDOR value="AKM"/>
+			<RAW_DATA_UNIT value="0.06"/>
+			<MIN_INTERVAL value="20"/>
+			<MIN_RANGE value="-1200"/>
+			<MAX_RANGE value="1200"/>
+		</MODEL>
+
 		<MODEL id="AK09911C">
 			<NAME value="AK09911C" />
 			<VENDOR value="AKM"/>
@@ -319,6 +344,7 @@
 			<VENDOR value="Tizen_SDK"/>
 			<RAW_DATA_UNIT value="0.6"/>
 			<RESOLUTION value="14"/>
+			<MIN_INTERVAL value="1"/>
 			<MIN_RANGE value="-2000"/>
 			<MAX_RANGE value="2000"/>
 		</MODEL>
@@ -415,6 +441,12 @@
 			<NAME value="PPS960" />
 			<VENDOR value="TI"/>
 		</MODEL>
+
+		<MODEL id="maru_sensor_hrm_1">
+			<NAME value="maru_sensor_hrm_1" />
+			<VENDOR value="Tizen_SDK"/>
+			<RAW_DATA_UNIT value="0.1"/>
+		</MODEL>
 	</HRM>
 
 	<PRESSURE>
@@ -427,6 +459,39 @@
 			<RESOLUTION value="1"/>
 			<TEMPERATURE_RESOLUTION value="0.002083"/>
 			<TEMPERATURE_OFFSET value="42.5"/>
+		</MODEL>
+
+		<MODEL id="LPS22H">
+			<NAME value="LPS22H" />
+			<VENDOR value="ST Microelectronics"/>
+			<RAW_DATA_UNIT value="0.000244"/>
+			<MIN_RANGE value="260"/>
+			<MAX_RANGE value="1260"/>
+			<RESOLUTION value="1"/>
+			<TEMPERATURE_RESOLUTION value="0.001"/>
+			<TEMPERATURE_OFFSET value="0.0"/>
+		</MODEL>
+
+		<MODEL id="LPS331">
+			<NAME value="LPS331" />
+			<VENDOR value="ST Microelectronics"/>
+			<RAW_DATA_UNIT value="0.000244"/>
+			<MIN_RANGE value="260"/>
+			<MAX_RANGE value="1260"/>
+			<RESOLUTION value="1"/>
+			<TEMPERATURE_RESOLUTION value="0.002083"/>
+			<TEMPERATURE_OFFSET value="42.5"/>
+		</MODEL>
+
+		<MODEL id="maru_sensor_pressure_1">
+			<NAME value="maru_sensor_pressure_1" />
+			<VENDOR value="Tizen_SDK"/>
+			<RAW_DATA_UNIT value="0.0193"/>
+			<MIN_RANGE value="260"/>
+			<MAX_RANGE value="1260"/>
+			<RESOLUTION value="1"/>
+			<TEMPERATURE_RESOLUTION value="0.05"/>
+			<TEMPERATURE_OFFSET value="0"/>
 		</MODEL>
 	</PRESSURE>
 
@@ -517,6 +582,13 @@
 			<NAME value="UVIS25" />
 			<VENDOR value="STM"/>
 			<RAW_DATA_UNIT value="0.0625"/>
+			<MIN_RANGE value="0"/>
+			<MAX_RANGE value="15"/>
+		</MODEL>
+		<MODEL id="maru_sensor_uv_1">
+			<NAME value="maru_sensor_uv_1" />
+			<VENDOR value="Tizen_SDK"/>
+			<RAW_DATA_UNIT value="0.1"/>
 			<MIN_RANGE value="0"/>
 			<MAX_RANGE value="15"/>
 		</MODEL>

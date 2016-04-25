@@ -57,7 +57,7 @@ private:
 
 	std::function<bool (void)> update_value;
 
-	static std::vector<uint32_t> event_ids;
+	std::vector<uint32_t> event_ids;
 
 	bool update_value_adc(void);
 	bool update_value_lux(void);

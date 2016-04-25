@@ -41,7 +41,7 @@
 #define REACTIVE_ALERT_OFF	0
 #define REACTIVE_ALERT_ON	1
 
-#define UNKNOWN_NAME "UNKNOWN"
+#define SENSOR_NAME "SENSOR_ACCELEROMETER"
 
 #define SENSOR_TYPE_ACCEL		"ACCEL"
 
@@ -50,7 +50,7 @@
 
 static sensor_info_t sensor_info = {
 	id: 0x1,
-	name: "ACCELEROMETER",
+	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_ACCELEROMETER,
 	event_type: (SENSOR_DEVICE_ACCELEROMETER << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
 	model_name: UNKNOWN_NAME,
@@ -62,8 +62,6 @@ static sensor_info_t sensor_info = {
 	max_batch_count: 0,
 	wakeup_supported: false
 };
-
-std::vector<uint32_t> accel_device::event_ids;
 
 accel_device::accel_device()
 : m_node_handle(-1)
@@ -138,7 +136,7 @@ accel_device::accel_device()
 	m_raw_data_unit = (float)(raw_data_unit);
 	_I("m_raw_data_unit = %f", m_raw_data_unit);
 
-	m_node_handle = open(m_data_node.c_str(), O_RDWR);
+	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
 		_ERRNO(errno, _E, "accel handle open fail for accel processor");
@@ -146,11 +144,8 @@ accel_device::accel_device()
 	}
 
 	if (m_method == INPUT_EVENT_METHOD) {
-		int clockId = CLOCK_MONOTONIC;
-		if (ioctl(m_node_handle, EVIOCSCLOCKID, &clockId) != 0) {
-			_E("Fail to set monotonic timestamp for %s", m_data_node.c_str());
+		if (!util::set_monotonic_clock(m_node_handle))
 			throw ENXIO;
-		}
 
 		update_value = [=]() {
 			return this->update_value_input_event();
@@ -303,8 +298,12 @@ bool accel_device::update_value_input_event(void)
 
 bool accel_device::update_value_iio(void)
 {
-	const int READ_LEN = 14;
-	char data[READ_LEN] = {0,};
+	struct {
+		int16_t x;
+		int16_t y;
+		int16_t z;
+		int64_t timestamp;
+	} __attribute__((packed)) data;
 
 	struct pollfd pfd;
 
@@ -332,17 +331,17 @@ bool accel_device::update_value_iio(void)
 		return false;
 	}
 
-	int len = read(m_node_handle, data, sizeof(data));
+	int len = read(m_node_handle, &data, sizeof(data));
 
 	if (len != sizeof(data)) {
 		_E("Failed to read data, m_node_handle:%d read_len:%d", m_node_handle, len);
 		return false;
 	}
 
-	memcpy(&m_x, data, sizeof(short));
-	memcpy(&m_y, (data + 2), sizeof(short));
-	memcpy(&m_z, (data + 4), sizeof(short));
-	memcpy(&m_fired_time, (data + 6), sizeof(long long));
+	m_x = data.x;
+	m_y = data.y;
+	m_z = data.z;
+	m_fired_time = data.timestamp;
 
 	_D("m_x = %d, m_y = %d, m_z = %d, time = %lluus", m_x, m_y, m_z, m_fired_time);
 

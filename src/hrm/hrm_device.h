@@ -45,6 +45,7 @@ private:
 	int m_spo2;
 	int m_peek_to_peek;
 	float m_snr;
+	float m_raw_data_unit;
 	unsigned long m_polling_interval;
 	unsigned long long m_fired_time;
 	bool m_interval_supported;
@@ -61,8 +62,10 @@ private:
 
 	std::function<bool (void)> update_value;
 
-	static std::vector<uint32_t> event_ids;
+	std::vector<uint32_t> event_ids;
 
 	bool update_value_input_event(void);
+
+	void raw_to_base(sensor_data_t *data);
 };
 #endif /*_HRM_DEVICE_H_*/
