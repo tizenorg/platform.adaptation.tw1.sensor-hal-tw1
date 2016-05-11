@@ -38,11 +38,14 @@
 #define MIN_RANGE(RES) (-((1 << (RES))/2))
 #define MAX_RANGE(RES) (((1 << (RES))/2)-1)
 
-#define REACTIVE_ALERT_OFF	0
-#define REACTIVE_ALERT_ON	1
+#define MODEL_NAME "UNKNOWN"
+#define VENDOR "UNKNOWN"
+#define RESOLUTION 0
+#define RAW_DATA_UNIT 0
+#define MIN_INTERVAL 0
+#define MAX_BATCH_COUNT 0
 
 #define SENSOR_NAME "SENSOR_ACCELEROMETER"
-
 #define SENSOR_TYPE_ACCEL		"ACCEL"
 
 #define INPUT_NAME	"accelerometer_sensor"
@@ -53,13 +56,13 @@ static sensor_info_t sensor_info = {
 	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_ACCELEROMETER,
 	event_type: (SENSOR_DEVICE_ACCELEROMETER << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
-	model_name: UNKNOWN_NAME,
-	vendor: UNKNOWN_NAME,
-	min_range: 0,
-	max_range: 0,
-	resolution: 0,
-	min_interval: 0,
-	max_batch_count: 0,
+	model_name: MODEL_NAME,
+	vendor: VENDOR,
+	min_range: MIN_RANGE(RESOLUTION) * RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(RAW_DATA_UNIT),
+	max_range: MAX_RANGE(RESOLUTION) * RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(RAW_DATA_UNIT),
+	resolution: RAW_DATA_TO_METRE_PER_SECOND_SQUARED_UNIT(RAW_DATA_UNIT),
+	min_interval: MIN_INTERVAL,
+	max_batch_count: MAX_BATCH_COUNT,
 	wakeup_supported: false
 };
 

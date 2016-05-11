@@ -40,8 +40,6 @@ public:
 	bool enable(uint32_t id);
 	bool disable(uint32_t id);
 
-	bool set_interval(uint32_t id, unsigned long val);
-
 	int read_fd(uint32_t **ids);
 	int get_data(uint32_t id, sensor_data_t **data, int *length);
 
@@ -65,5 +63,5 @@ private:
 
 	bool update_value_input_event(void);
 };
-#endif /* _PROXI_DEVICE_H_ */
 
+#endif /* _PROXI_DEVICE_H_ */
