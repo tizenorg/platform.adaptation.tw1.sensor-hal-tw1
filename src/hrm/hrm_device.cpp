@@ -247,7 +247,7 @@ bool hrm_device::update_value_input_event(void)
 		}
 	}
 
-	if (hrm_raw[0] > HR_MAX) {
+	if ((hrm_raw[0] * m_raw_data_unit) > HR_MAX) {
 		_E("Drop abnormal HR: %d", hrm_raw[0]);
 		return false;
 	}
