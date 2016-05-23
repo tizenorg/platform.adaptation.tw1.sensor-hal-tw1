@@ -90,7 +90,7 @@ extern "C" int create(sensor_device_t **devices)
 	create_sensor<light_device>("Light");
 #endif
 #ifdef ENABLE_PROXIMITY
-	create_sensor<proxi_device>("Proxi");
+	create_sensor<proxi_device>("Proximity");
 #endif
 #ifdef ENABLE_HRM_RAW
 	create_sensor<hrm_raw_device>("HRM Raw");

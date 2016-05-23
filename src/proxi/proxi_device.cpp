@@ -14,6 +14,7 @@
  * limitations under the License.
  *
  */
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -29,24 +30,34 @@
 #include <sensor_config.h>
 #include "proxi_device.h"
 
+#define MODEL_NAME "UNKNOWN"
+#define VENDOR "UNKNOWN"
+#define MIN_RANGE 0
+#define MAX_RANGE 5
+#define RESOLUTION 1
+#define MIN_INTERVAL 1
+#define MAX_BATCH_COUNT 0
+
 #define SENSOR_NAME "SENSOR_PROXIMITY"
 #define SENSOR_TYPE_PROXI		"PROXI"
 
 #define INPUT_NAME	"proximity_sensor"
 #define PROXI_SENSORHUB_POLL_NODE_NAME "prox_poll_delay"
 
+#define RAW_DATA_TO_DISTANCE(x) ((x) * 5)
+
 static sensor_info_t sensor_info = {
 	id: 0x1,
 	name: SENSOR_NAME,
 	type: SENSOR_DEVICE_PROXIMITY,
 	event_type: (SENSOR_DEVICE_PROXIMITY << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
-	model_name: UNKNOWN_NAME,
-	vendor: UNKNOWN_NAME,
-	min_range: 0,
-	max_range: 5,
-	resolution: 1,
-	min_interval: 1,
-	max_batch_count: 0,
+	model_name: MODEL_NAME,
+	vendor: VENDOR,
+	min_range: MIN_RANGE,
+	max_range: MAX_RANGE,
+	resolution: RESOLUTION,
+	min_interval: MIN_INTERVAL,
+	max_batch_count: MAX_BATCH_COUNT,
 	wakeup_supported: false
 };
 
@@ -157,11 +168,6 @@ bool proxi_device::disable(uint32_t id)
 	return true;
 }
 
-bool proxi_device::set_interval(uint32_t id, unsigned long val)
-{
-	return false;
-}
-
 bool proxi_device::update_value_input_event(void)
 {
 	struct input_event proxi_event;
@@ -214,7 +220,7 @@ int proxi_device::get_data(uint32_t id, sensor_data_t **data, int *length)
 	sensor_data->accuracy = SENSOR_ACCURACY_GOOD;
 	sensor_data->timestamp = m_fired_time;
 	sensor_data->value_count = 1;
-	sensor_data->values[0] = m_state * 5;
+	sensor_data->values[0] = RAW_DATA_TO_DISTANCE(m_state);
 
 	*data = sensor_data;
 	*length = sizeof(sensor_data_t);
