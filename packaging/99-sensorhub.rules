@@ -1,0 +1,9 @@
+SUBSYSTEMS=="sensors", DEVPATH=="*ssp_sensor*", \
+RUN+="/bin/sh -c '/bin/chown :input %S/%p/enable %S/%p/set_cal_data %S/%p/*_poll_delay'"
+
+SUBSYSTEMS=="sensors", DEVPATH=="*ssp_sensor*", \
+RUN+="/bin/sh -c '/bin/chsmack -a \* %S/%p/enable %S/%p/set_cal_data %S/%p/*_poll_delay'"
+
+SUBSYSTEMS=="misc", DEVPATH=="/devices/virtual/misc/ssp_sensorhub", \
+ENV{DEVNAME}=="/dev/ssp_sensorhub", GROUP="input", SECLABEL{smack}="*"
+
