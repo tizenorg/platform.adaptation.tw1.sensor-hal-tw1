@@ -22,7 +22,6 @@
 #include <string>
 #include <vector>
 #include <functional>
-#include "hrm_raw_data_reader.h"
 
 class hrm_raw_device : public sensor_device {
 public:
@@ -51,19 +50,15 @@ private:
 	bool m_sensorhub_controlled;
 	int m_enable;
 
-	hrm_raw_data_reader *m_reader;
-
 	int m_method;
 	std::string m_data_node;
 	std::string m_enable_node;
 	std::string m_interval_node;
 
-	std::string m_model_id;
-	std::string m_vendor;
-	std::string m_chip_name;
+	std::function<bool (void)> update_value;
 
 	std::vector<uint32_t> event_ids;
 
-	hrm_raw_data_reader* get_reader(const std::string& reader);
+	bool update_value_input_event(void);
 };
 #endif /* _HRM_RAW_DEVICE_H_ */
