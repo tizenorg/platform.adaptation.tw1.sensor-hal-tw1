@@ -28,11 +28,17 @@
 #include <util.h>
 #include <sensor_common.h>
 #include <sensor_log.h>
-#include <sensor_config.h>
 
-#include "hrm_raw_data_reader_standard.h"
-#include "hrm_raw_data_reader_adi.h"
 #include "hrm_raw_device.h"
+
+#define MODEL_NAME "AD45251"
+#define VENDOR "ANALOG DEVICES"
+#define MIN_RANGE 0
+#define MAX_RANGE 1000
+#define RESOLUTION 1
+#define RAW_DATA_UNIT 1
+#define MIN_INTERVAL 1
+#define MAX_BATCH_COUNT 0
 
 #define SENSOR_NAME "SENSOR_HRM_RAW"
 #define SENSOR_TYPE_HRM_RAW "HRM_RAW"
@@ -43,7 +49,6 @@
 #define INDEX_HRM_RAW 0x1
 #define INDEX_HRM_LED_GREEN 0x2
 
-#define ELEMENT_READER			"READER"
 #define POLL_1HZ_MS 1000
 
 static sensor_info_t sensor_info[] = {
@@ -52,13 +57,13 @@ static sensor_info_t sensor_info[] = {
 		name: SENSOR_NAME,
 		type: SENSOR_DEVICE_HRM_RAW,
 		event_type: (SENSOR_DEVICE_HRM_RAW << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
-		model_name: UNKNOWN_NAME,
-		vendor: UNKNOWN_NAME,
-		min_range: 0,
-		max_range: 1,
-		resolution: 1,
-		min_interval: 1,
-		max_batch_count: 0,
+		model_name: MODEL_NAME,
+		vendor: VENDOR,
+		min_range: MIN_RANGE,
+		max_range: MAX_RANGE,
+		resolution: RAW_DATA_UNIT,
+		min_interval: MIN_INTERVAL,
+		max_batch_count: MAX_BATCH_COUNT,
 		wakeup_supported: false
 	},
 	{
@@ -66,13 +71,13 @@ static sensor_info_t sensor_info[] = {
 		name: "HRM LED GREEN SENSOR",
 		type: SENSOR_DEVICE_HRM_LED_GREEN,
 		event_type: (SENSOR_DEVICE_HRM_LED_GREEN << SENSOR_EVENT_SHIFT) | RAW_DATA_EVENT,
-		model_name: UNKNOWN_NAME,
-		vendor: UNKNOWN_NAME,
-		min_range: 0,
-		max_range: 1,
-		resolution: 1,
-		min_interval: 1,
-		max_batch_count: 0,
+		model_name: MODEL_NAME,
+		vendor: VENDOR,
+		min_range: MIN_RANGE,
+		max_range: MAX_RANGE,
+		resolution: RAW_DATA_UNIT,
+		min_interval: MIN_INTERVAL,
+		max_batch_count: MAX_BATCH_COUNT,
 		wakeup_supported: false
 	}
 };
@@ -85,18 +90,11 @@ hrm_raw_device::hrm_raw_device()
 , m_interval_supported(false)
 , m_sensorhub_controlled(false)
 , m_enable(0)
-, m_reader(NULL)
 {
 	const std::string sensorhub_interval_node_name = HRM_SENSORHUB_POLL_NODE_NAME;
-	config::sensor_config &config = config::sensor_config::get_instance();
 
 	node_info_query query;
 	node_info info;
-
-	if (!util::find_model_id(SENSOR_TYPE_HRM_RAW, m_model_id)) {
-		_E("Failed to find model id");
-		throw ENXIO;
-	}
 
 	query.sensorhub_controlled = m_sensorhub_controlled = util::is_sensorhub_controlled(sensorhub_interval_node_name);
 	query.sensor_type = SENSOR_TYPE_HRM_RAW;
@@ -119,33 +117,10 @@ hrm_raw_device::hrm_raw_device()
 	if (access(m_interval_node.c_str(), F_OK) == 0)
 		m_interval_supported = true;
 
-	if (!config.get(SENSOR_TYPE_HRM_RAW, m_model_id, ELEMENT_VENDOR, m_vendor)) {
-		_E("[VENDOR] is empty");
-		throw ENXIO;
-	}
-
-	_I("m_vendor = %s", m_vendor.c_str());
-
-	if (!config.get(SENSOR_TYPE_HRM_RAW, m_model_id, ELEMENT_NAME, m_chip_name)) {
-		_E("[NAME] is empty");
-		throw ENXIO;
-	}
-
-	_I("m_chip_name = %s",m_chip_name.c_str());
-
-	std::string reader;
-
-	if (!config.get(SENSOR_TYPE_HRM_RAW, m_model_id, ELEMENT_READER, reader)) {
-		_E("[READER] is empty");
-		throw ENXIO;
-	}
-
-	_I("reader = %s", reader.c_str());
-
 	m_node_handle = open(m_data_node.c_str(), O_RDONLY);
 
 	if (m_node_handle < 0) {
-		_ERRNO(errno, _E, "hrm raw handle open fail for hrm raw sensor");
+		_ERRNO(errno, _E, "Failed to open HRM Raw handle");
 		throw ENXIO;
 	}
 
@@ -155,45 +130,31 @@ hrm_raw_device::hrm_raw_device()
 	if (!util::set_monotonic_clock(m_node_handle))
 		throw ENXIO;
 
-	m_reader = get_reader(reader);
-
-	if (!m_reader) {
-		_E("Not supported HRM sensor: %s", m_model_id.c_str());
-		throw ENXIO;
-	}
-
-	if (!m_reader->open())
-		throw ENXIO;
+	update_value = [=]() {
+		return this->update_value_input_event();
+	};
 
 	_I("hrm_raw_device is created!");
 }
 
 hrm_raw_device::~hrm_raw_device()
 {
-	delete m_reader;
 	close(m_node_handle);
 	m_node_handle = -1;
 
 	_I("hrm_raw_device is destroyed!");
 }
 
-int hrm_raw_device::get_poll_fd()
+int hrm_raw_device::get_poll_fd(void)
 {
 	return m_node_handle;
 }
 
 int hrm_raw_device::get_sensors(const sensor_info_t **sensors)
 {
-	int size = ARRAY_SIZE(sensor_info);
-
-	for (int i = 0; i < size; ++i) {
-		sensor_info[i].model_name = m_chip_name.c_str();
-		sensor_info[i].vendor = m_vendor.c_str();
-	}
-
 	*sensors = sensor_info;
 
-	return size;
+	return 2;
 }
 
 bool hrm_raw_device::enable(uint32_t id)
@@ -208,8 +169,6 @@ bool hrm_raw_device::enable(uint32_t id)
 		set_interval(id, m_polling_interval);
 
 	m_data.timestamp = 0;
-
-	m_reader->start();
 	_I("Enable HRM Raw sensor");
 	return true;
 }
@@ -223,7 +182,6 @@ bool hrm_raw_device::disable(uint32_t id)
 
 	util::set_enable_node(m_enable_node, m_sensorhub_controlled, false, SENSORHUB_HRM_RAW_ENABLE_BIT);
 
-	m_reader->stop();
 	m_enable = 0;
 	_I("Disable HRM Raw sensor");
 	return true;
@@ -260,16 +218,106 @@ bool hrm_raw_device::set_interval(uint32_t id, unsigned long val)
 	return true;
 }
 
+bool hrm_raw_device::update_value_input_event(void)
+{
+	const int SLOT_A_RED = 0;
+	const int SLOT_AB_BOTH = 1;
+	const int SLOT_B_IR = 2;
+
+	const int INPUT_MAX_BEFORE_SYN = 20;
+	bool syn = false;
+	int read_input_cnt = 0;
+	struct input_event hrm_raw_input;
+
+	static int ir_sum = 0, red_sum = 0;
+	static int ppg_ch[8] = { 0, };
+	static int ppg_ch_idx = 0;
+	static int sub_mode = 0;
+
+	while ((syn == false) && (read_input_cnt < INPUT_MAX_BEFORE_SYN)) {
+		int len = read(m_node_handle, &hrm_raw_input, sizeof(hrm_raw_input));
+		if (len != sizeof(hrm_raw_input)) {
+			_E("hrm_raw_file read fail, read_len = %d", len);
+			return false;
+		}
+
+		++read_input_cnt;
+
+		if (hrm_raw_input.type == EV_REL) {
+			switch (hrm_raw_input.code) {
+			case REL_X:
+				red_sum = hrm_raw_input.value - 1;
+				break;
+			case REL_Y:
+				ir_sum = hrm_raw_input.value - 1;
+				break;
+			case REL_Z:
+				sub_mode = hrm_raw_input.value - 1;
+				break;
+			default:
+				_E("hrm_raw_input event[type = %d, code = %d] is unknown", hrm_raw_input.type, hrm_raw_input.code);
+				return false;
+				break;
+			}
+		} else if (hrm_raw_input.type == EV_MSC) {
+			if (hrm_raw_input.code == MSC_RAW) {
+				ppg_ch[ppg_ch_idx++] = (hrm_raw_input.value - 1);
+			} else {
+				_E("hrm_raw_input event[type = %d, code = %d] is unknown", hrm_raw_input.type, hrm_raw_input.code);
+				return false;
+			}
+		} else if (hrm_raw_input.type == EV_SYN) {
+			syn = true;
+			ppg_ch_idx = 0;
+
+			memset(m_data.values, 0, sizeof(m_data.values));
+
+			if (sub_mode == SLOT_A_RED) {
+				for (int i = 6; i < 10; i++)
+					m_data.values[i] = (float)(ppg_ch[i - 6]);
+
+			} else if(sub_mode == SLOT_AB_BOTH) {
+				m_data.values[0] = (float)(ir_sum);
+				m_data.values[1] = (float)(red_sum);
+
+				for (int i = 2; i < 6; i++)
+					m_data.values[i] = (float)(ppg_ch[i + 2]);
+
+				for (int i = 6; i < 10; i++)
+					m_data.values[i] = (float)(ppg_ch[i - 6]);
+
+			} else if (sub_mode == SLOT_B_IR) {
+				for (int i = 2; i < 6; i++)
+					m_data.values[i] = (float)(ppg_ch[i - 2]);
+			}
+
+			m_data.values[10] = (float)(sub_mode);
+			m_data.value_count = 11;
+			m_data.timestamp = util::get_timestamp(&hrm_raw_input.time);
+
+		} else {
+			_E("hrm_raw_input event[type = %d, code = %d] is unknown.", hrm_raw_input.type, hrm_raw_input.code);
+			return false;
+		}
+	}
+
+	if (!syn) {
+		_E("EV_SYN didn't come until %d inputs had come", read_input_cnt);
+		return false;
+	}
+
+	return true;
+}
 int hrm_raw_device::read_fd(uint32_t **ids)
 {
-	if (!m_reader->get_data(m_node_handle, m_data)) {
+	if (!update_value()) {
 		_D("Failed to update value");
 		return false;
 	}
 
-	int size = ARRAY_SIZE(sensor_info);
-
 	event_ids.clear();
+
+	int size = ARRAY_SIZE(sensor_info);
 
 	for (int i = 0; i < size; ++i)
 		event_ids.push_back(sensor_info[i].id);
@@ -301,15 +349,4 @@ int hrm_raw_device::get_data(uint32_t id, sensor_data_t **data, int *length)
 	*length = sizeof(sensor_data_t);
 
 	return --remains;
-}
-
-hrm_raw_data_reader* hrm_raw_device::get_reader(const std::string& reader)
-{
-	static const std::string ADI("adi");
-
-	if (reader == ADI)
-		return new(std::nothrow) hrm_raw_data_reader_adi();
-	else
-		return new(std::nothrow) hrm_raw_data_reader_standard();
-	return NULL;
 }
