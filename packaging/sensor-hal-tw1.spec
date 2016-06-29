@@ -16,10 +16,6 @@ ExcludeArch: %{arm} aarch64 %ix86 x86_64
 
 BuildRequires:  cmake
 BuildRequires:  pkgconfig(dlog)
-BuildRequires:  pkgconfig(glib-2.0)
-BuildRequires:  pkgconfig(gio-2.0)
-BuildRequires:  pkgconfig(libxml-2.0)
-BuildRequires:  pkgconfig(vconf)
 BuildRequires:  sensor-hal-devel
 
 %description
@@ -52,7 +48,6 @@ install -m 0644 %SOURCE2 %{buildroot}%{_libdir}/udev/rules.d
 /sbin/ldconfig
 
 %files
-%attr(0644,root,root)/usr/etc/sensor.xml
 %manifest packaging/%{name}.manifest
 %{_libdir}/udev/rules.d/99-sensor.rules
 %{_libdir}/udev/rules.d/99-sensorhub.rules
