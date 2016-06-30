@@ -24,9 +24,6 @@
 #define NAME_MAX 256
 #endif
 
-#define EVENT_TYPE_SHIFT 16
-#define SENSOR_TYPE_SHIFT 32
-
 #ifdef LOG_TAG
 	#undef LOG_TAG
 #endif
