@@ -1,6 +1,6 @@
 Name:       sensor-hal-tw1
 Summary:    TW1 Sensor HAL
-Version:    1.0.2
+Version:    1.0.3
 Release:    0
 Group:      Service/Sensor
 License:    Apache-2.0
